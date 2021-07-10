@@ -11,15 +11,19 @@ regions Us, Eu, China,Korea and Taiwan, and before normalizing the data it was n
 the same base currency, so was obtained from https://www.investing.com the historical conversion from current currency
 to USD, and matched it with the original price in each region of WoWtoken it self, that lacks historical value but as
 was researched, haven't changed over the years.
-
                              Prices of WoW token on Blizzard service.
-                        Region	  |  Currency  |	WoW token price in Currency  
-                                  |            |                                
-                        US	      |  USD       |  	        $20.00                  
-                        EU	      |  EUR	     |           20.00 €               
-                        CHINA	    |  CNY	     |           ￥75.00  
-                        KOREA	    |  KRW	     |          ￦22,000               
-                        TAIWAN	  |  TWD	     |         NT$500.00                
+                             
+| Region	  |  Currency  |	WoW token price in currency   |
+| --------- | ---------- | ------------------------------ |
+| US	      |  USD       |  	        $20.00              |    
+| EU	      |  EUR	     |           20.00 €              |
+| CHINA	    |  CNY	     |           ￥75.00              |
+| KOREA     |  KRW	     |          ￦22,000              |            
+| TAIWAN	  |  TWD	     |         NT$500.00              |  
+                       
+                         
+
+
 
 After all processing, the final data was from Gold per WoW token in each region to gold per USD, as was correlated currency
 conversion to WoW token price in each region resulting them to an gold per USD base.
