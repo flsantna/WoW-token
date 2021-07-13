@@ -24,7 +24,7 @@ def plot_graph(true_data, window,predicted_data=None, plot_predict=False, title=
     plt.xticks(np.arange(0, true_data.shape[0], true_data.shape[0]//plot_tick), rotation=45)
     plt.xlabel('Date index: base 14/02/2015')
     plt.ylabel('Normalized data')
-    plt.savefig('graphs/{} - all data pred {}'.format(title, window))
+    plt.savefig('graphs-2/{} - all data pred {}'.format(title, window))
     if plot:
         plt.show()
 
@@ -47,7 +47,7 @@ def plot_graph_array(true_data, predicted_data, title='', plot=False, plot_tick=
     plt.xticks(np.arange(0, true_data.shape[0], true_data.shape[0]//plot_tick), rotation=45)
     plt.xlabel('Date index: base 14/02/2015')
     plt.ylabel('Normalized data')
-    plt.savefig('graphs/{} - todos os dias'.format(title))
+    plt.savefig('graphs-2/{} - todos os dias'.format(title))
     if plot:
         plt.show()
 
@@ -80,6 +80,7 @@ def date_index_dict(y=2015, m=4, d=12 ):
 
 
 def window_to_series(array, window):
+    # Convert an array of windows in a series forward one step.
     series = np.array(array[0])
     for i in array[1:]:
         temp_array = i[-window:]
@@ -96,50 +97,12 @@ class Processing(object):
         self.list_currency_types = {"eu": 'EUR', "china": 'CNY', "korea": "KRW", "taiwan": "TWD"}
         self.currency_token = {"us": 20, "eu": 20, "china": 75, "korea": 22000, "taiwan": 500}
         _, self.dates_dict = date_index_dict()
+        # Variables to store max_min and mean_std values to further inverse_normalization if needed.
         self.max_min = []
         self.mean_std = []
         self.keys = []
+        # Normalized final dataset.
         self.normalized_data = self.normalization()
-
-    def normalization(self):
-        data = self.dataset[:2170]
-        for text in list_key:
-            if not text == 'us' and convert_to_USD:
-                convert_currency = np.reshape(self.currency_proc(text),
-                                              newshape=[self.currency_proc(text).shape[0], ])
-                data[text] = (data[text].to_numpy()*convert_currency) / self.currency_token[text]
-            elif text == "us" and convert_to_USD:
-                data[text] = data[text].to_numpy() / self.currency_token[text]
-        dataset = data
-        if normalization == "min_max":
-            normalized_dataset = (dataset - dataset.min()) / (dataset.max() - dataset.min())
-            self.max_min = [dataset.max(), dataset.min()]
-            self.keys = dataset.columns.to_list()
-        elif normalization == "mean":
-            normalized_dataset = (dataset - dataset.mean()) / (dataset.std())
-            self.mean_std = [dataset.mean(), dataset.std()]
-            self.keys = dataset.columns.to_list()
-        else:
-            normalized_dataset = (dataset - dataset.mean()) / (dataset.std())
-            self.max_min = [dataset.max(), dataset.min()]
-            self.keys = dataset.columns.to_list()
-
-        return normalized_dataset.to_numpy()
-
-    def inverse_normalization(self, data, key=False):
-        if normalization == "min_max":
-            if not key:
-                keys = self.keys
-            else:
-                keys = key
-            data = data * (self.max_min[0][keys] - self.max_min[1][keys]) + self.max_min[1][keys]
-        elif normalization == "mean":
-            if not key:
-                keys = self.keys
-            else:
-                keys = key
-            data = data * self.mean_std[1][keys] + self.mean_std[0][keys]
-        return data
 
     def currency_proc(self, key):
         currency = pd.read_csv('dataset/USD_' + self.list_currency_types[key] + ' Historical Data.csv')
@@ -161,6 +124,46 @@ class Processing(object):
         currency_output = currency_dataframe.fillna(currency_dataframe.interpolate
                                                     (method='linear', limit_direction='forward'))
         return currency_output.to_numpy()[self.full_dataset.index.values[0]: 2250]
+
+    def normalization(self):
+        # Cutting to 2170 to match the range of data in currency conversion arrays and dataset.
+        data = self.dataset[:2170]
+        for text in list_key:
+            if not text == 'us' and convert_to_USD:
+                convert_currency = np.reshape(self.currency_proc(text),
+                                              newshape=[self.currency_proc(text).shape[0], ])
+                data[text] = (data[text].to_numpy()*convert_currency) / self.currency_token[text]
+            elif text == "us" and convert_to_USD:
+                data[text] = data[text].to_numpy() / self.currency_token[text]
+        dataset = data
+        if normalization == "min_max":
+            normalized_dataset = (dataset - dataset.min()) / (dataset.max() - dataset.min())
+            self.max_min = [dataset.max(), dataset.min()]
+            self.keys = dataset.columns.to_list()
+        elif normalization == "mean":
+            normalized_dataset = (dataset - dataset.mean()) / (dataset.std())
+            self.mean_std = [dataset.mean(), dataset.std()]
+            self.keys = dataset.columns.to_list()
+        else:
+            normalized_dataset = (dataset - dataset.mean()) / (dataset.std())
+            self.max_min = [dataset.max(), dataset.min()]
+            self.keys = dataset.columns.to_list()
+        return normalized_dataset.to_numpy()
+
+    def inverse_normalization(self, data, key=False):
+        if normalization == "min_max":
+            if not key:
+                keys = self.keys
+            else:
+                keys = key
+            data = data * (self.max_min[0][keys] - self.max_min[1][keys]) + self.max_min[1][keys]
+        elif normalization == "mean":
+            if not key:
+                keys = self.keys
+            else:
+                keys = key
+            data = data * self.mean_std[1][keys] + self.mean_std[0][keys]
+        return data
 
     def get_data(self, key, look_back, window):
         x_data, y_data = [], []

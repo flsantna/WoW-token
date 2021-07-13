@@ -1,11 +1,8 @@
 import numpy as np
-import pandas as pd
-from config import list_key, total_epochs, test_rate, batch_size, window, look_back, \
+from config import list_key, total_epochs, test_rate, window, look_back, \
     early_stopping_patience, val_loss_on_train
-import matplotlib.pyplot as plt
-import matplotlib.ticker as tick
 from bin.model import LSTM_Model
-from data_proc import Processing, plot_graph
+from data_proc import Processing
 from tensorflow import GradientTape
 import tensorflow as tf
 import time
@@ -18,13 +15,6 @@ def train_step(batch_data, batch_label):
     gradients = tape.gradient(loss_value, model.trainable_variables)
     optimizer.apply_gradients(grads_and_vars=zip(gradients, model.trainable_variables))
     loss_mean.update_state(values=loss_value)
-
-"""
-def test_step(batch_data, batch_label):
-    predicted = model.call(batch_data)
-    val_loss_value = loss(y_true=batch_label, y_pred=predicted)
-    val_loss_mean.update_state(values=val_loss_value)
-"""
 
 
 def test_step(batch_data, batch_label):
@@ -62,7 +52,7 @@ for key in range(len(list_key)):
         train_step(batch_data=data_train_x, batch_label=data_train_y)
         if val_loss_on_train:
             test_step(batch_data=data_test_x, batch_label=data_test_y)
-            val_loss_list.append(round(val_loss_mean.result().numpy(),ndigits=5))
+            val_loss_list.append(round(val_loss_mean.result().numpy(), ndigits=5))
             print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f} Val Loss {:.5f}, "
                   "Estimated time to end all epochs: {:.0f}h:{:.0f}m"
                   .format(epoch,
@@ -90,21 +80,3 @@ for key in range(len(list_key)):
     val_loss_mean.reset_states()
     model.save_weights(filepath='model/w{}/lb{}_trained_with_{}_total_epochs{}'
                        .format(window, look_back, list_key[key], total_epochs), save_format='tf')
-
-"""
-for key in range(len(list_key)-1):
-    data_x, data_y = proc.get_data(key=key)
-    test_size = int(data_x.shape[0]*test_rate)
-    data_test_x.append(data_x[-test_size:])
-    data_test_y.append(data_y[-test_size:])
-    data_x = data_x[:-test_size]
-    data_y = data_y[:-test_size]
-    model.summary()
-    if key != 0:
-        model.load_weights(filepath='model/{}_trained_2_with_{}_total_epochs{}'
-                           .format(key-1,list_key[key-1],total_epochs))
-    model.fit(x=data_x, y=data_y, epochs=total_epochs, batch_size=100)
-    model.save_weights(filepath='model/{}_trained_2_with_{}_total_epochs{}'
-                       .format(key,list_key[key],total_epochs), save_format='tf')
-
-"""

@@ -13,7 +13,6 @@ if __name__ == '__main__':
     print("Done!", '\n')
 
     dates_index, dates_dict = date_index_dict()
-
     # The pandas dataframe to receive the transformed data.
     dataframe = pd.DataFrame(data=[], index=dates_index, columns=columns)
 
