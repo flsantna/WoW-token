@@ -1,9 +1,11 @@
+from abc import ABC
+
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.models import Model
 
 
-class LSTM_Model(Model):
+class LSTM_Model(Model, ABC):
     def __init__(self, window, look_back, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.model = Sequential()

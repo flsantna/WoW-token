@@ -7,12 +7,12 @@ import time
 import datetime as dt
 
 
-def plot_graph(true_data, window,predicted_data=None, plot_predict=False, title='', plot = False, plot_tick=5):
+def plot_graph(true_data, window, dates, test_size=0, predicted_data=None, plot_predict=False, title='',
+               plot=False, file_name='days predicted', plot_tick=5):
     if predicted_data is None:
         predicted_data = []
     fig, ax = plt.subplots()
-    # legends and colors
-    # ax.plot(data2, color='#d7191c', label=data2_name) # ls=--
+
     if plot_predict:
         ax.plot(predicted_data[0], label=predicted_data[1], color='red')
     ax.plot(true_data, label="Real data", color='blue')
@@ -21,33 +21,44 @@ def plot_graph(true_data, window,predicted_data=None, plot_predict=False, title=
     ax.legend(loc='best', shadow=False, fontsize='small')
     ax.set_title('WoWtokens price from {}. Predicted {} days.'.format(title.capitalize(), window))
     # X legend and Y legend
-    plt.xticks(np.arange(0, true_data.shape[0], true_data.shape[0]//plot_tick), rotation=45)
-    plt.xlabel('Date index: base 14/02/2015')
-    plt.ylabel('Normalized data')
-    plt.savefig('graphs-2/{} - all data pred {}'.format(title, window))
+    ticks_xaxis = np.arange(0, true_data.shape[0], true_data.shape[0]//plot_tick)
+    plt.xticks(ticks_xaxis, labels=[dates[i] for i in ticks_xaxis], rotation=20)
+    if not test_size == 0:
+        plt.axline((true_data.shape[0]-test_size, np.max(predicted_data[0])*0.8),
+                   (true_data.shape[0]-test_size, np.min(predicted_data[0])*0.8), color='black', lw=1.5)
+    plt.xlabel('Dates')
+    plt.ylabel('Normalized dataset')
+    plt.subplots_adjust(left=0.125, bottom=0.152, right=0.9, top=0.88, wspace=0.2, hspace=0.2)
+    plt.savefig('graphs/{} - {} {}'.format(title, file_name, window))
     if plot:
         plt.show()
 
 
-def plot_graph_array(true_data, predicted_data, title='', plot=False, plot_tick=5):
+def plot_graph_array(true_data, dates, predicted_data, test_size=0, title='',
+                     plot=False, file_name="all predicts", plot_tick=5):
     fig, ax = plt.subplots()
     # legends and colors
     # ax.plot(data2, color='#d7191c', label=data2_name) # ls=--
     colors = ['g', 'r', 'c', 'm', 'y', ]
     for i in range(len(predicted_data)):
         predict_days = predicted_data[i][2]
-        ax.plot(predicted_data[i][0], label=str(predict_days)+" days. RMSE: "+str(predicted_data[i][1])
-                , color=colors[i])
+        ax.plot(predicted_data[i][0], label=str(predict_days)+" days. RMSE: "+str(predicted_data[i][1]),
+                color=colors[i])
     ax.plot(true_data, label="Real data", color='b')
     ax.grid()
     # position of the legend
     ax.legend(loc='best', shadow=False, fontsize='small')
     ax.set_title('WoWtokens price from ' + title.capitalize())
     # X legend and Y legend
-    plt.xticks(np.arange(0, true_data.shape[0], true_data.shape[0]//plot_tick), rotation=45)
-    plt.xlabel('Date index: base 14/02/2015')
-    plt.ylabel('Normalized data')
-    plt.savefig('graphs-2/{} - todos os dias'.format(title))
+    ticks_xaxis = np.arange(0, true_data.shape[0], true_data.shape[0] // plot_tick)
+    plt.xticks(ticks_xaxis, labels=[dates[i] for i in ticks_xaxis], rotation=20)
+    if not test_size == 0:
+        plt.axline((true_data.shape[0]-test_size, np.max(predicted_data[0])*0.8),
+                   (true_data.shape[0]-test_size, np.min(predicted_data[0])*0.8), color='black', lw=1.5)
+    plt.xlabel('Dates')
+    plt.ylabel('Normalized dataset')
+    plt.subplots_adjust(left=0.125, bottom=0.152, right=0.9, top=0.88, wspace=0.2, hspace=0.2)
+    plt.savefig('graphs/{} - {}'.format(title, file_name))
     if plot:
         plt.show()
 
@@ -66,7 +77,7 @@ def date_inverse_conver(x):
     return time_convert.total_seconds()
 
 
-def date_index_dict(y=2015, m=4, d=12 ):
+def date_index_dict(y=2015, m=4, d=12):
     # First day of series of data. Using timedelta 1 to manipulate the indexing in python.
     d_day = dt.datetime(year=y, month=m, day=d) + dt.timedelta(days=1)
     t_day = dt.datetime.today() + dt.timedelta(days=1)
@@ -97,6 +108,7 @@ class Processing(object):
         self.list_currency_types = {"eu": 'EUR', "china": 'CNY', "korea": "KRW", "taiwan": "TWD"}
         self.currency_token = {"us": 20, "eu": 20, "china": 75, "korea": 22000, "taiwan": 500}
         _, self.dates_dict = date_index_dict()
+        self.dates_list = []
         # Variables to store max_min and mean_std values to further inverse_normalization if needed.
         self.max_min = []
         self.mean_std = []
@@ -148,6 +160,11 @@ class Processing(object):
             normalized_dataset = (dataset - dataset.mean()) / (dataset.std())
             self.max_min = [dataset.max(), dataset.min()]
             self.keys = dataset.columns.to_list()
+
+        # Final list of range of dates in normalized_dataset.
+        self.dates_list = list(self.dates_dict.keys())[normalized_dataset.index.values.tolist()[0]:
+                                                       (normalized_dataset.index.values.tolist()[-1] + 1)]
+
         return normalized_dataset.to_numpy()
 
     def inverse_normalization(self, data, key=False):
@@ -180,3 +197,6 @@ class Processing(object):
         x_data = tf.cast(x_data, dtype=tf.dtypes.float32)
         y_data = tf.cast(y_data, dtype=tf.dtypes.float32)
         return x_data, y_data
+
+    def real_dataset(self, key):
+        return self.normalized_data[..., key]

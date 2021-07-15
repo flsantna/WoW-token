@@ -32,11 +32,12 @@ loss = tf.keras.losses.MeanSquaredError()
 loss_mean = tf.keras.metrics.Mean()
 val_loss_mean = tf.keras.metrics.Mean()
 model = LSTM_Model(window=window, look_back=look_back)
+lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.0001, decay_steps=5000,
+                                                              decay_rate=0.9)
+optimizer = tf.keras.optimizers.Adamax(learning_rate=lr_scheduler, epsilon=0.002)
 
 for key in range(len(list_key)):
-    lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.001, decay_steps=5000,
-                                                                  decay_rate=0.9)
-    optimizer = tf.keras.optimizers.Adamax(learning_rate=lr_scheduler, epsilon=0.002)
+
     start_time = time.time()
     data_x, data_y = proc.get_data(key=key, look_back=look_back, window=window)
     test_size = int(data_x.shape[0] * test_rate)
