@@ -2,16 +2,17 @@
 
 WoWtoken is an item that can be purchased on World of Warcraft store and be sold in game by it's currency, that is gold
 and can be used to redeem gameplay time as the game is monthly subscribed for $13,99/month.
-So, the goal is create an model that can predict the next 3 days, 7 days, 14 days and 28 days of gold price in USD.
+So, the goal is to create a model that can predict the next 3 days, 7 days, 14 days and 28 days of gold price in USD.
 
 ## Data Processing
 
 For data processing, was used mean normalization and to guarantee a good amount of data, was used prices from the
 regions Us, Eu, China,Korea and Taiwan, and before normalizing the data it was needed a conversion to all of them have
 the same base currency, so was obtained from https://www.investing.com the historical conversion from current currency
-to USD, and matched it with the original price in each region of WoWtoken it self, that lacks historical value but as
-was researched, haven't changed over the years.
-                             Prices of WoW token on Blizzard service.
+to USD, and matched it with the original price in each region of WoWtoken itself, that lacks historical value but as
+was researched hasn't changed over the years.
+
+                             Prices of WoW tokens on Blizzard service.
                              
 | Region	  |  Currency  |	WoW token price in currency   |
 | --------- | ---------- | ------------------------------ |
@@ -25,7 +26,7 @@ was researched, haven't changed over the years.
 
 
 After all processing, the final data was from Gold per WoW token in each region to gold per USD, as was correlated currency
-conversion to WoW token price in each region resulting them to an gold per USD base.
+conversion to WoW token price in each region resulting in gold per USD base.
 
 
 ## Training and evaluation of the model
@@ -50,16 +51,16 @@ feeded to the model it is in general, 1 unit forward the previous one. As exempl
 
 This leads to the input shape [Quantity of sequences, 3, 5].
 
-After defined the model, got up to training it. Was configured the Early stopping to avoid overfiting and save time. As
-base, was chosen 1500 epochs to train the model, but in average, it finished in 800 epochs of no change in last 10 epochs.
+After defining the model, I got up to training it. Was configured Early stopping to avoid overfitting and save time. As
+base, was chosen 1500 epochs to train the model, but on average, it finished in 800 epochs of no change in the last 10 epochs.
 
 ## Result
 
 As result, was generated some range of predictions, they are:
 
-1) All test dataset predicted using true data as training, in a cenário where are the need to get an insight about it, and them the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
-2) All test dataset predicted using, as the model moves foward predicting, it's own predicitions, which leads overall a bigger RMSE. Images on graphs/ with suffix "all data".
-3) Predictions of only the chosen windows. Images on graphs/ with suffix "days predicted".
+1) All test dataset predicted using true data as training, in a cenário where there is the need to get an insight about it, and then the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
+2) All test dataset predicted using, as the model moves forward predicting, it's own predictions, which leads overall a bigger RMSE. Images on graphs/ with the suffix "all data".
+3) Predictions of only the chosen windows. Images on graphs/ with the suffix "days predicted".
 
 All predicted windows in one image with their own RMSE.
 
@@ -73,7 +74,7 @@ Other graphs can be found at [https://github.com/flsantna/WoW-token/tree/master/
 
 The project is mainly focused on 3 scripts:
 
-1) [https://github.com/flsantna/WoW-token/blob/master/creation_of_csv_wowtoken_price.py] - Creates the base CSV file, colecting data on [https://wowtokenprices.com] and parsing the json to csv while filling all missing values and croping them.
+1) [https://github.com/flsantna/WoW-token/blob/master/creation_of_csv_wowtoken_price.py] - Creates the base CSV file, collecting data on [https://wowtokenprices.com] and parsing the json to csv while filling all missing values and cropping them.
 2) [https://github.com/flsantna/WoW-token/blob/master/model_train.py] - Train the model, calling [https://github.com/flsantna/WoW-token/blob/master/data_proc.py] to process the dataset, normalizing its values and if chosen in config.py, convert all bases to gold/usd.
 3) [https://github.com/flsantna/WoW-token/blob/master/model_test.py] - Test the model and plot all the graphs.
 
