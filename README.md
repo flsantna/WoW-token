@@ -55,6 +55,33 @@ base, was chosen 1500 epochs to train the model, but in average, it finished in 
 
 ## Result
 
+As result, was generated some range of predictions, they are:
+
+1) All test dataset predicted using true data as training, in a cenário where are the need to get an insight about it, and them the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
+2) All test dataset predicted using, as the model moves foward predicting, it's own predicitions, which leads overall a bigger RMSE. Images on graphs/ with suffix "all data".
+3) Predictions of only the chosen windows. Images on graphs/ with suffix "days predicted".
+
+All predicted windows in one image with their own RMSE.
+
 <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/us%20-%20all%20predicts.png" width="40%" height="40%"> <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/china%20-%20all%20predicts.png" width="40%" height="40%">
 <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/eu%20-%20all%20predicts.png" width="40%" height="40%"> <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/korea%20-%20all%20predicts.png" width="40%" height="40%">
-<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/taiwan%20-%20todos%20os%20dias.png" width="40%" height="40%">
+<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/taiwan%20-%20all%20predicts.png" width="40%" height="40%">
+
+Other graphs can be found at [https://github.com/flsantna/WoW-token/tree/master/graphs].
+
+## Instructions to use
+
+The project is mainly focused on 3 scripts:
+
+1) [https://github.com/flsantna/WoW-token/blob/master/creation_of_csv_wowtoken_price.py] - Creates the base CSV file, colecting data on [https://wowtokenprices.com] and parsing the json to csv while filling all missing values and croping them.
+2) [https://github.com/flsantna/WoW-token/blob/master/model_train.py] - Train the model, calling [https://github.com/flsantna/WoW-token/blob/master/data_proc.py] to process the dataset, normalizing its values and if chosen in config.py, convert all bases to gold/usd.
+3) [https://github.com/flsantna/WoW-token/blob/master/model_test.py] - Test the model and plot all the graphs.
+
+## Used packages and versions
+
+| Package    | Version |
+| ---------- | ------ |
+| tensorflow | 2.5.0 |
+| numpy | 1.19.5 |
+| pandas | 1.2.4 |
+| matplotlib | 3.4.2 |
