@@ -7,6 +7,7 @@ from config import test_type, predict_days
 
 test_rate = 0.15
 # Creation of an object that process the dataset.
+
 data_test_x, data_test_y = [], []
 if __name__ == '__main__':
 
@@ -18,6 +19,8 @@ if __name__ == '__main__':
         all_predicts = []
         all_true_data = []
         all_train_data = []
+        dates = proc.dates_list
+
         for key in range(len(list_key)):
             data_x, data_y = proc.get_data(key=key, look_back=look_back, window=window)
             test_size = int(data_x.shape[0] * test_rate)
@@ -37,7 +40,9 @@ if __name__ == '__main__':
                 tf.keras.losses.mean_squared_error(y_true=data_in_series_y, y_pred=data_pred_series_y))
             print('{} RMSE: {}%'.format(list_key[key], rmse))
 
-            plot_graph(true_data=np.append(data_train_series_y, data_in_series_y, axis=0), window=window,
+            plot_graph(true_data=np.append(data_train_series_y, data_in_series_y, axis=0),
+                       window=window,
+                       dates=dates,
                        predicted_data=[np.append(data_train_series_y, data_pred_series_y, axis=0),
                                        '{} : RMSE: {:.5f}'.format(list_key[key], rmse.numpy())],
                        title=list_key[key], plot_predict=True, plot=True)
