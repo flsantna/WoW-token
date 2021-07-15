@@ -20,7 +20,6 @@ was researched, haven't changed over the years.
 | CHINA	    |  CNY	     |           ￥75.00              |
 | KOREA     |  KRW	     |          ￦22,000              |            
 | TAIWAN	  |  TWD	     |         NT$500.00              |  
-                       
                          
 
 
@@ -56,4 +55,6 @@ base, was chosen 1500 epochs to train the model, but in average, it finished in 
 
 ## Result
 
-
+<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/us%20-%20all%20predicts.png" width="40%" height="40%"> <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/china%20-%20all%20predicts.png" width="40%" height="40%">
+<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/eu%20-%20all%20predicts.png" width="40%" height="40%"> <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/korea%20-%20all%20predicts.png" width="40%" height="40%">
+<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/taiwan%20-%20todos%20os%20dias.png" width="40%" height="40%">
