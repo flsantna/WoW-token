@@ -14,11 +14,11 @@ normalization = "mean"
 # LSTM config
 configs_test = [[3, 30], [7, 45], [14, 90], [28, 180]]
 predict_choice = 0
-total_epochs = 1750
+total_epochs = 1700
 batch_size = 100
 test_rate = 0.15
 val_loss_on_train = True
-early_stopping_patience = 5
+early_stopping_patience = 15
 
 window = configs_test[predict_choice][0]
 look_back = configs_test[predict_choice][1]

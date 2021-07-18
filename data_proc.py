@@ -29,7 +29,7 @@ def plot_graph(true_data, window, dates, test_size=0, predicted_data=None, plot_
     plt.xlabel('Dates')
     plt.ylabel('Normalized dataset')
     plt.subplots_adjust(left=0.125, bottom=0.152, right=0.9, top=0.88, wspace=0.2, hspace=0.2)
-    plt.savefig('graphs/{} - {} {}'.format(title, file_name, window))
+    plt.savefig('graphs-2/{} - {} {}'.format(title, file_name, window))
     if plot:
         plt.show()
 
@@ -58,7 +58,7 @@ def plot_graph_array(true_data, dates, predicted_data, test_size=0, title='',
     plt.xlabel('Dates')
     plt.ylabel('Normalized dataset')
     plt.subplots_adjust(left=0.125, bottom=0.152, right=0.9, top=0.88, wspace=0.2, hspace=0.2)
-    plt.savefig('graphs/{} - {}'.format(title, file_name))
+    plt.savefig('graphs-2/{} - {}'.format(title, file_name))
     if plot:
         plt.show()
 

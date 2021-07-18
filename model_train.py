@@ -1,6 +1,7 @@
 import numpy as np
 from config import list_key, total_epochs, test_rate, window, look_back, \
     early_stopping_patience, val_loss_on_train
+from bin.early_stop import EarlyStopping, BreakException
 from bin.model import LSTM_Model
 from data_proc import Processing
 from tensorflow import GradientTape
@@ -48,13 +49,12 @@ if __name__ == '__main__':
         data_test_x = data_x[-test_size:]
         data_test_y = data_y[-test_size:]
 
-        val_loss_list = []
+        early_stop = EarlyStopping()
         for epoch in range(total_epochs):
             time_per_epoch = (time.time() - start_time) / (epoch + 1)
             train_step(batch_data=data_train_x, batch_label=data_train_y)
             if val_loss_on_train:
                 test_step(batch_data=data_test_x, batch_label=data_test_y)
-                val_loss_list.append(round(val_loss_mean.result().numpy(), ndigits=5))
                 print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f} Val Loss {:.5f}, "
                       "Estimated time to end all epochs: {:.0f}h:{:.0f}m"
                       .format(epoch,
@@ -64,11 +64,13 @@ if __name__ == '__main__':
                               val_loss_mean.result(),
                               time.localtime((time_per_epoch * total_epochs) + start_time).tm_hour,
                               time.localtime((time_per_epoch * total_epochs) + start_time).tm_min))
-                if len(val_loss_list) == early_stopping_patience:
-                    std = np.std(val_loss_list)
-                    if std == 0:
-                        break
-                    val_loss_list = []
+                try:
+                    early_stop.to_break(loss=(round(val_loss_mean.result().numpy(), ndigits=5)),
+                                        model=model, patience=early_stopping_patience)
+                except BreakException:
+                    model = early_stop.get_best_model()
+                    print("Best model with loss {} was loaded".format(early_stop.best_model[1]))
+                    break
 
             else:
                 print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f}, Estimated time to end all epochs: {:.0f}h:{:.0f}m"
