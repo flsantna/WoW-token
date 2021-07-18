@@ -98,10 +98,9 @@ if __name__ == '__main__':
                 data_pred_series_y = window_to_series(predict, window=window)[:test_size]
                 data_train_series_y = proc.real_dataset(key)[:-test_size]
 
-                pred_y_unit = tf.squeeze(model.call(inputs=tf.expand_dims(data_test_x[0], axis=0)),axis=0)
+                pred_y_unit = tf.squeeze(model.call(inputs=tf.expand_dims(data_test_x[0], axis=0)), axis=0)
                 test_y_unit = data_test_y[0]
                 test_x_unit = data_in_series_y[:look_back]
-
 
                 rmse = tf.math.sqrt(
                     tf.keras.losses.mean_squared_error(y_true=data_in_series_y, y_pred=data_pred_series_y))

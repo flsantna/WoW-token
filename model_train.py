@@ -2,6 +2,7 @@ import numpy as np
 from config import list_key, total_epochs, test_rate, window, look_back, \
     early_stopping_patience, val_loss_on_train
 from bin.model import LSTM_Model
+from bin.early_stop import EarlyStop, BreakException
 from data_proc import Processing
 from tensorflow import GradientTape
 import tensorflow as tf
@@ -47,13 +48,12 @@ for key in range(len(list_key)):
     data_test_x = data_x[-test_size:]
     data_test_y = data_y[-test_size:]
 
-    val_loss_list = []
+    early_stopping = EarlyStop()
     for epoch in range(total_epochs):
         time_per_epoch = (time.time() - start_time) / (epoch + 1)
         train_step(batch_data=data_train_x, batch_label=data_train_y)
         if val_loss_on_train:
             test_step(batch_data=data_test_x, batch_label=data_test_y)
-            val_loss_list.append(round(val_loss_mean.result().numpy(), ndigits=5))
             print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f} Val Loss {:.5f}, "
                   "Estimated time to end all epochs: {:.0f}h:{:.0f}m"
                   .format(epoch,
@@ -63,11 +63,13 @@ for key in range(len(list_key)):
                           val_loss_mean.result(),
                           time.localtime((time_per_epoch * total_epochs) + start_time).tm_hour,
                           time.localtime((time_per_epoch * total_epochs) + start_time).tm_min))
-            if len(val_loss_list) == early_stopping_patience:
-                std = np.std(val_loss_list)
-                if std == 0:
-                    break
-                val_loss_list = []
+            try:
+                early_stopping.check(loss=round(val_loss_mean.result().numpy(), ndigits=5),
+                                     model=model, patience=early_stopping_patience)
+            except BreakException:
+                print("No improvement by the last {} epochs. Loaded best model!!!".format(early_stopping_patience))
+                model = early_stopping.get_best_model()
+                break
 
         else:
             print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f}, Estimated time to end all epochs: {:.0f}h:{:.0f}m"
