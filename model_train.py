@@ -1,4 +1,5 @@
-import numpy as np
+import pandas as pd
+
 from config import list_key, total_epochs, test_rate, window, look_back, \
     early_stopping_patience, val_loss_on_train
 from bin.model import LSTM_Model
@@ -7,6 +8,8 @@ from data_proc import Processing
 from tensorflow import GradientTape
 import tensorflow as tf
 import time
+from pandas import DataFrame, concat, Series
+import numpy as np
 
 
 def train_step(batch_data, batch_label):
@@ -19,9 +22,9 @@ def train_step(batch_data, batch_label):
 
 
 def test_step(batch_data, batch_label):
-    data_pred_test = batch_data[0]
-    predict = model.call(inputs=tf.expand_dims(data_pred_test, axis=0))
-    val_loss_value = loss(y_true=batch_label[0], y_pred=predict)
+    data_pred_test = batch_data
+    predict = model.call(inputs=data_pred_test)
+    val_loss_value = loss(y_true=batch_label, y_pred=predict)
     val_loss_mean.update_state(values=val_loss_value)
 
 
@@ -29,13 +32,16 @@ def test_step(batch_data, batch_label):
 proc = Processing()
 
 # Model structure defined.
-loss = tf.keras.losses.MeanSquaredError()
+loss = tf.keras.losses.BinaryCrossentropy()
 loss_mean = tf.keras.metrics.Mean()
 val_loss_mean = tf.keras.metrics.Mean()
 model = LSTM_Model(window=window, look_back=look_back)
 lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.0001, decay_steps=5000,
                                                               decay_rate=0.9)
-optimizer = tf.keras.optimizers.Adamax(learning_rate=lr_scheduler, epsilon=0.002)
+optimizer = tf.keras.optimizers.Adam(learning_rate=lr_scheduler)
+
+# create a log of loss and validation loss
+loss_log = DataFrame(index=range(total_epochs))
 
 for key in range(len(list_key)):
 
@@ -48,12 +54,18 @@ for key in range(len(list_key)):
     data_test_x = data_x[-test_size:]
     data_test_y = data_y[-test_size:]
 
+    # Create a log for capture loss and validation loss
+    loss_list = []
+    val_loss_list = []
+
     early_stopping = EarlyStop()
     for epoch in range(total_epochs):
         time_per_epoch = (time.time() - start_time) / (epoch + 1)
         train_step(batch_data=data_train_x, batch_label=data_train_y)
         if val_loss_on_train:
             test_step(batch_data=data_test_x, batch_label=data_test_y)
+            loss_list.append(loss_mean.result().numpy())
+            val_loss_list.append(val_loss_mean.result().numpy())
             print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f} Val Loss {:.5f}, "
                   "Estimated time to end all epochs: {:.0f}h:{:.0f}m"
                   .format(epoch,
@@ -79,7 +91,10 @@ for key in range(len(list_key)):
                           loss_mean.result(),
                           time.localtime((time_per_epoch * total_epochs) + start_time).tm_hour,
                           time.localtime((time_per_epoch * total_epochs) + start_time).tm_min))
+    loss_log = concat([loss_log, Series(loss_list).rename("loss " + list_key[key])], axis=1)
+    loss_log = concat([loss_log, Series(val_loss_list).rename("val_loss " + list_key[key])], axis=1)
     loss_mean.reset_states()
     val_loss_mean.reset_states()
-    model.save_weights(filepath='model/w{}/lb{}_trained_with_{}_total_epochs{}'
+    model.save_weights(filepath='model/w{}/lb{}_trained_with_{}_total_val_loss_mean.result()epochs{}'
                        .format(window, look_back, list_key[key], total_epochs), save_format='tf')
+loss_log.to_csv("output/loss_log.csv", index_label="Epochs")

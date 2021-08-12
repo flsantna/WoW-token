@@ -20,7 +20,7 @@ class LSTM_Model(Model, ABC):
         self.model.add(LSTM(units=128))
         self.model.add(Dropout(0.2))
         self.model.add(Dense(128))
-        self.model.add(Dense(window))
+        self.model.add(Dense(2, activation="sigmoid"))
 
     def call(self, inputs, training=None, mask=None):
         output = self.model(inputs)
