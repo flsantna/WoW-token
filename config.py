@@ -16,6 +16,7 @@ configs_test = [[1, 7], [1, 14], [1, 30]]
 predict_choice = 1
 total_epochs = 1000
 batch_size = 100
+train_in_batch = True
 test_rate = 0.15
 val_loss_on_train = True
 early_stopping_patience = 20

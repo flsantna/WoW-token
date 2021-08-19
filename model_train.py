@@ -1,7 +1,7 @@
 import pandas as pd
 
 from config import list_key, total_epochs, test_rate, window, look_back, \
-    early_stopping_patience, val_loss_on_train
+    early_stopping_patience, val_loss_on_train, batch_size, train_in_batch
 from bin.model import LSTM_Model
 from bin.early_stop import EarlyStop, BreakException
 from data_proc import Processing
@@ -26,6 +26,11 @@ def test_step(batch_data, batch_label):
     predict = model.call(inputs=data_pred_test)
     val_loss_value = loss(y_true=batch_label, y_pred=predict)
     val_loss_mean.update_state(values=val_loss_value)
+
+
+def batch_data(data, batch_size, index):
+    data_batch = data[index*batch_size:index*batch_size + batch_size]
+    return data_batch
 
 
 # Creation of an object that process the dataset.
@@ -59,14 +64,27 @@ for key in range(len(list_key)):
     val_loss_list = []
 
     early_stopping = EarlyStop()
+
+    # Step
+    train_step_size = (data_train_x.shape[0] // batch_size) + 1
+    test_step_size = (data_test_x.shape[0] // batch_size) + 1
+
     for epoch in range(total_epochs):
         time_per_epoch = (time.time() - start_time) / (epoch + 1)
-        train_step(batch_data=data_train_x, batch_label=data_train_y)
+        if train_in_batch:
+            for step in range(train_step_size):
+                data_train_x_batch = batch_data(data=data_train_x, batch_size=batch_size, index=step)
+                data_train_y_batch = batch_data(data=data_train_y, batch_size=batch_size, index=step)
+                train_step(batch_data=data_train_x_batch, batch_label=data_train_y_batch)
+#                print("Epoch: {}/{},{}/{} steps, Loss: {:.5f}"
+#                      .format(epoch, total_epochs, step, train_step_size, loss_mean.result()))
+        else:
+            train_step(batch_data=data_train_x, batch_label=data_train_y)
         if val_loss_on_train:
             test_step(batch_data=data_test_x, batch_label=data_test_y)
             loss_list.append(loss_mean.result().numpy())
             val_loss_list.append(val_loss_mean.result().numpy())
-            print("Epoch: {}/{}, {:.2f}s/epoch, Loss: {:.5f} Val Loss {:.5f}, "
+            print("Epoch: {}/{},{:.2f}s/epoch, Loss: {:.5f} Val Loss {:.5f}, "
                   "Estimated time to end all epochs: {:.0f}h:{:.0f}m"
                   .format(epoch,
                           total_epochs,

@@ -199,6 +199,7 @@ class Processing(object):
 
             x_data.append(value)
             y_data.append(value_output_window)
+
         x_data = tf.cast(x_data, dtype=tf.dtypes.float32)
         y_data = tf.cast(y_data, dtype=tf.dtypes.float32)
         return x_data, y_data
