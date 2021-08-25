@@ -1,8 +1,8 @@
 ## Prediction of WoWtoken price in gold using LSTM networks.
 
-The project was a different approach to [Correlation](https://github.com/Cividati-inatel-ic/correlation) and [Prediction](https://github.com/cividati-inatel-ic/Prediction) applying lstm deep learning neural networks to predict in 4 differents windows and 2 ways of generating a data and compared to the original test dataset that was not presented to the model during training.
+The project was a different approach to [Correlation](https://github.com/Cividati-inatel-ic/correlation) and [Prediction](https://github.com/cividati-inatel-ic/Prediction) applying lstm deep learning neural networks to predict in 4 different windows and 2 ways of generating a data and compared to the original test dataset that was not presented to the model during training.
 
-As said by [Cividati](https://github.com/cividati) a WoWtoken is an item that can be purchased on World of Warcraft store and be sold in game by it's currency, that is gold and can be used to redeem gameplay time as the game is monthly subscribed for $13,99/month. So, the goal is to create a model that can predict the next 3 days, 7 days, 14 days and 28 days of gold price in USD.
+As said by [Cividati](https://github.com/cividati) a WoWtoken is an item that can be purchased on World of Warcraft store and be sold in game by its currency, that is gold and can be used to redeem gameplay time as the game is monthly subscribed for $13,99/month. So, the goal is to create a model that can predict the next 3 days, 7 days, 14 days and 28 days of gold price in USD.
 
 ## Data Processing
 
@@ -33,12 +33,12 @@ conversion to WoW token price in each region resulting in gold per USD base.
 
 The final model was constructed with 4 lstm layers and as output layer, one dense with output of X units, equal to the
 selected window in config.py file. As input, the model get the data in the format [Batch, Window, Lookback] as window
-being the prediction window, 3,, 7, 14 or 28 units, and lookback, that is the amount of data that the model receives to
+being the prediction window, 3, 7, 14 or 28 units, and lookback, that is the amount of data that the model receives to
 do its prediction.
 
-LSTM layer need it's data to be in window format, a window that moves through the dataset and creates overlapping between
-next and previous windows. For that to happen, was choose that the window moves 1 data per windows, so every data that is
-feeded to the model it is in general, 1 unit forward the previous one. As exemple:
+LSTM layer need its data to be in window format, a window that moves through the dataset and creates overlapping between
+next and previous windows. For that to happen, was chosen that the window moves 1 data per windows, so every data that is
+feeded to the model it is in general, 1 unit forward the previous one. As example:
 
                                       Lookback                     Window
 
@@ -58,8 +58,8 @@ base, was chosen 1500 epochs to train the model, but on average, it finished in 
 
 As result, was generated some range of predictions, they are:
 
-1) All test dataset predicted using true data as training, in a cenário where there is the need to get an insight about it, and then the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
-2) All test dataset predicted using, as the model moves forward predicting, it's own predictions, which leads overall a bigger RMSE. Images on graphs/ with the suffix "all data".
+1) All test dataset predicted using true data as training, in a scenario where there is the need to get an insight about it, and then the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
+2) All test dataset predicted using, as the model moves forward predicting, its own predictions, which leads overall a bigger RMSE. Images on graphs/ with the suffix "all data".
 3) Predictions of only the chosen windows. Images on graphs/ with the suffix "days predicted".
 
 All predicted windows in one image with their own RMSE.
