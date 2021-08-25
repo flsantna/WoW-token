@@ -12,10 +12,32 @@ from pandas import DataFrame, concat, Series
 import numpy as np
 
 
+def weighted_binary_crossentropy(y_true, y_pred):
+    """
+    Weighted binary crossentropy between an output tensor
+    and a target tensor. POS_WEIGHT is used as a multiplier
+    for the positive targets.
+
+    Combination of the following functions:
+    * keras.losses.binary_crossentropy
+    * keras.backend.tensorflow_backend.binary_crossentropy
+    * tf.nn.weighted_cross_entropy_with_logits
+    """
+    # Transform back to logits.
+    epsilon = tf.convert_to_tensor(tf.keras.backend.epsilon(), dtype=tf.dtypes.float32)
+    y_pred = tf.clip_by_value(y_pred, epsilon, 1 - epsilon)
+    y_pred = tf.math.log(y_pred / (1 - y_pred))
+    # compute weighted loss
+    loss = tf.nn.weighted_cross_entropy_with_logits(labels=y_true,
+                                                    logits=y_pred,
+                                                    pos_weight=5)
+    return tf.reduce_mean(loss, axis=-1)
+
+
 def train_step(batch_data, batch_label):
     with GradientTape() as tape:
         predicted = model.call(batch_data)
-        loss_value = loss(y_true=batch_label, y_pred=predicted)
+        loss_value = weighted_binary_crossentropy(y_true=batch_label, y_pred=predicted)
     gradients = tape.gradient(loss_value, model.trainable_variables)
     optimizer.apply_gradients(grads_and_vars=zip(gradients, model.trainable_variables))
     loss_mean.update_state(values=loss_value)
@@ -24,11 +46,11 @@ def train_step(batch_data, batch_label):
 def test_step(batch_data, batch_label):
     data_pred_test = batch_data
     predict = model.call(inputs=data_pred_test)
-    val_loss_value = loss(y_true=batch_label, y_pred=predict)
+    val_loss_value = weighted_binary_crossentropy(y_true=batch_label, y_pred=predict)
     val_loss_mean.update_state(values=val_loss_value)
 
 
-def batch_data(data, batch_size, index):
+def get_batch_data(data, batch_size, index):
     data_batch = data[index*batch_size:index*batch_size + batch_size]
     return data_batch
 
@@ -73,8 +95,8 @@ for key in range(len(list_key)):
         time_per_epoch = (time.time() - start_time) / (epoch + 1)
         if train_in_batch:
             for step in range(train_step_size):
-                data_train_x_batch = batch_data(data=data_train_x, batch_size=batch_size, index=step)
-                data_train_y_batch = batch_data(data=data_train_y, batch_size=batch_size, index=step)
+                data_train_x_batch = get_batch_data(data=data_train_x, batch_size=batch_size, index=step)
+                data_train_y_batch = get_batch_data(data=data_train_y, batch_size=batch_size, index=step)
                 train_step(batch_data=data_train_x_batch, batch_label=data_train_y_batch)
 #                print("Epoch: {}/{},{}/{} steps, Loss: {:.5f}"
 #                      .format(epoch, total_epochs, step, train_step_size, loss_mean.result()))

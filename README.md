@@ -32,41 +32,38 @@ conversion to WoW token price in each region resulting in gold per USD base.
 ## Training and evaluation of the model
 
 The final model was constructed with 4 lstm layers and as output layer, one dense with output of X units, equal to the
-selected window in config.py file. As input, the model get the data in the format [Batch, Window, Lookback] as window
-being the prediction window, 3,, 7, 14 or 28 units, and lookback, that is the amount of data that the model receives to
+selected window in config.py file. As input, the model get the data in the format [Batch, 1, Lookback] as prediction
+being a classification into [1, 0] for increase in value or [0, 1] for decreasing in value, comparing the target value
+to last one in Lookback units 3, 7, 14 or 28 units, that is the amount of data that the model receives to
 do its prediction.
 
 LSTM layer need it's data to be in window format, a window that moves through the dataset and creates overlapping between
-next and previous windows. For that to happen, was choose that the window moves 1 data per windows, so every data that is
-feeded to the model it is in general, 1 unit forward the previous one. As exemple:
+next and previous windows. For that to happen, was chosen that the window moves 1 data per windows, so every data that is
+feeded to the model it is in general, 1 unit forward the previous one. As example:
 
-                                      Lookback                     Window
+                                      Lookback                     Classification
 
-                                    [1, 2, 3, 4, 5]                 [6, 7, 8]
-                                    [2, 3, 4, 5, 6]                 [7, 8, 9]
+                                    [1, 2, 3, 4, 5]                 [6]
+                                    [2, 3, 4, 5, 6]                 [7]
                                                              .
                                                              .
                                                              .
-                                    [95, 96, 97, 98, 99]         [100, 101, 102]
+                                    [95, 96, 97, 98, 99]            [100]
 
-This leads to the input shape [Quantity of sequences, 3, 5].
+This leads to the input shape [Quantity of sequences, 1, 5].
 
-After defining the model, I got up to training it. Was configured Early stopping to avoid overfitting and save time. As
-base, was chosen 1500 epochs to train the model, but on average, it finished in 800 epochs of no change in the last 10 epochs.
+After defining the model, I got up to training it. Was configured Early stopping to avoid overfitting and save time.
 
 ## Result
 
 As result, was generated some range of predictions, they are:
 
-1) All test dataset predicted using true data as training, in a cenário where there is the need to get an insight about it, and then the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
-2) All test dataset predicted using, as the model moves forward predicting, it's own predictions, which leads overall a bigger RMSE. Images on graphs/ with the suffix "all data".
+1) All test dataset predicted using true data as training, in a scenario where there is the need to get an insight about it, and then the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
+2) All test dataset predicted using, as the model moves forward predicting, it's own predictions, which leads overall a bigger Accuracy. Images on graphs/ with the suffix "all data".
 3) Predictions of only the chosen windows. Images on graphs/ with the suffix "days predicted".
 
-All predicted windows in one image with their own RMSE.
-
-<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/us%20-%20all%20predicts.png" width="40%" height="40%"> <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/china%20-%20all%20predicts.png" width="40%" height="40%">
-<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/eu%20-%20all%20predicts.png" width="40%" height="40%"> <img src="https://github.com/flsantna/WoW-token/blob/master/graphs/korea%20-%20all%20predicts.png" width="40%" height="40%">
-<img src="https://github.com/flsantna/WoW-token/blob/master/graphs/taiwan%20-%20all%20predicts.png" width="40%" height="40%">
+All predicted windows in one image with their own ACCURACY.
+# IN CONSTRUCTION!!
 
 Other graphs can be found at [Graphs](https://github.com/flsantna/WoW-token/tree/master/graphs).
 
