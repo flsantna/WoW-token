@@ -1,4 +1,4 @@
-from numpy import std
+from numpy import std, mean
 
 
 class BreakException(Exception):
@@ -24,6 +24,11 @@ class EarlyStop(object):
 
         if len(self.list_loss) == patience:
             std_value = std(self.list_loss)
-            self.list_loss = []
             if std_value == 0:
                 raise BreakException()
+
+            mean_value_first_group = mean(self.list_loss[:int((patience/2))])
+            mean_value_second_group = mean(self.list_loss[int((patience/2)):])
+            if mean_value_second_group > mean_value_first_group:
+                raise BreakException()
+            self.list_loss = []

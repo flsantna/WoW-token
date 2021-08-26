@@ -30,14 +30,15 @@ def weighted_binary_crossentropy(y_true, y_pred):
     # compute weighted loss
     loss = tf.nn.weighted_cross_entropy_with_logits(labels=y_true,
                                                     logits=y_pred,
-                                                    pos_weight=5)
+                                                    pos_weight=2)
+   # return loss
     return tf.reduce_mean(loss, axis=-1)
 
 
 def train_step(batch_data, batch_label):
     with GradientTape() as tape:
         predicted = model.call(batch_data)
-        loss_value = weighted_binary_crossentropy(y_true=batch_label, y_pred=predicted)
+        loss_value = loss(y_true=batch_label, y_pred=predicted)
     gradients = tape.gradient(loss_value, model.trainable_variables)
     optimizer.apply_gradients(grads_and_vars=zip(gradients, model.trainable_variables))
     loss_mean.update_state(values=loss_value)
@@ -46,7 +47,7 @@ def train_step(batch_data, batch_label):
 def test_step(batch_data, batch_label):
     data_pred_test = batch_data
     predict = model.call(inputs=data_pred_test)
-    val_loss_value = weighted_binary_crossentropy(y_true=batch_label, y_pred=predict)
+    val_loss_value = loss(y_true=batch_label, y_pred=predict)
     val_loss_mean.update_state(values=val_loss_value)
 
 
@@ -59,12 +60,12 @@ def get_batch_data(data, batch_size, index):
 proc = Processing()
 
 # Model structure defined.
-loss = tf.keras.losses.BinaryCrossentropy()
+loss = tf.keras.losses.MeanSquaredError()
 loss_mean = tf.keras.metrics.Mean()
 val_loss_mean = tf.keras.metrics.Mean()
 model = LSTM_Model(window=window, look_back=look_back)
-lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.0001, decay_steps=5000,
-                                                              decay_rate=0.9)
+lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.001, decay_steps=15000,
+                                                              decay_rate=0.97)
 optimizer = tf.keras.optimizers.Adam(learning_rate=lr_scheduler)
 
 # create a log of loss and validation loss

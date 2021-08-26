@@ -32,10 +32,8 @@ conversion to WoW token price in each region resulting in gold per USD base.
 ## Training and evaluation of the model
 
 The final model was constructed with 4 lstm layers and as output layer, one dense with output of X units, equal to the
-selected window in config.py file. As input, the model get the data in the format [Batch, 1, Lookback] as prediction
-being a classification into [1, 0] for increase in value or [0, 1] for decreasing in value, comparing the target value
-to last one in Lookback units 3, 7, 14 or 28 units, that is the amount of data that the model receives to
-do its prediction.
+selected window in config.py file. As input, the model get the data in the format [Batch, Lookback, Window], the prediction output is compared with the real data 
+and extracted indicatives for decreasing in value or increasing while calculating itself rmse to evaluate how close is to real data.
 
 LSTM layer need it's data to be in window format, a window that moves through the dataset and creates overlapping between
 next and previous windows. For that to happen, was chosen that the window moves 1 data per windows, so every data that is
@@ -50,7 +48,7 @@ feeded to the model it is in general, 1 unit forward the previous one. As exampl
                                                              .
                                     [95, 96, 97, 98, 99]            [100]
 
-This leads to the input shape [Quantity of sequences, 1, 5].
+This leads to the input shape [Quantity of sequences, 5, 1].
 
 After defining the model, I got up to training it. Was configured Early stopping to avoid overfitting and save time.
 

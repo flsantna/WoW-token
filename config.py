@@ -15,12 +15,12 @@ normalization = "mean"
 # LSTM config
 configs_test = [[1, 7], [1, 14], [1, 30]]
 predict_choice = 1
-total_epochs = 1000
+total_epochs = 3500
 batch_size = 500
 train_in_batch = True
 test_rate = 0.15
 val_loss_on_train = True
-early_stopping_patience = 20
+early_stopping_patience = 150
 
 window = configs_test[predict_choice][0]
 look_back = configs_test[predict_choice][1]
@@ -30,4 +30,4 @@ look_back = configs_test[predict_choice][1]
 # can be tweaked in predict_days and inside the code in model_test.py.
 test_type = 0
 predict_days = [1, 1, 1]
-threshold = 0.7
+threshold_eval = 0.5

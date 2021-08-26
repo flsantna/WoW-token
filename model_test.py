@@ -1,19 +1,18 @@
 import numpy as np
-from config import list_key, total_epochs, look_back, window, configs_test
+from config import list_key, total_epochs, look_back, window, configs_test, threshold_eval
 from bin.model import LSTM_Model
 from data_proc import Processing, plot_graph, window_to_series
 import tensorflow as tf
 from config import test_type
 
 
-def map_classification(item, threshold=0.8):
-
-    if item[0] >= threshold:
-        item = [1, 0]
-        return item
+def map_classification(data, predict):
+    if predict >= data:
+        predict = 1
+        return predict
     else:
-        item = [0, 1]
-        return item
+        predict = 0
+        return predict
 
 
 def map_comparison(item_x, item_y):
@@ -35,6 +34,7 @@ if __name__ == '__main__':
         model_load_path = 'model/w{}/lb{}_trained_with_{}_total_val_loss_mean.result()epochs{}'\
             .format(window, look_back, list_key[4], total_epochs)
         for key in range(len(list_key)):
+
             data_x, data_y = proc.get_data(key=key, look_back=look_back, window=window)
             test_size = int(data_x.shape[0] * test_rate)
 
@@ -45,14 +45,20 @@ if __name__ == '__main__':
             dates = proc.dates_list
 
             model.load_weights(filepath=model_load_path)
-            predict = model.call(data_test_x)
+            prediction = model.call(data_test_x)
 
-            predicted_map = list(map(map_classification, predict))
+            predicted_map = list(map(map_classification, tf.squeeze(data_test_x, axis=-1).numpy()[..., -1:].tolist()
+                                     , prediction.numpy().tolist()))
+            label_map = list(map(map_classification, tf.squeeze(data_test_x, axis=-1).numpy()[..., -1:].tolist()
+                                 , data_test_y.numpy().tolist()))
 
-            binary_crossentropy = tf.keras.losses.binary_crossentropy(y_true=data_test_y, y_pred=predict)
+            accuracy = list(map(map_comparison, label_map, predicted_map))
+            rmse = tf.math.sqrt(
+                tf.keras.losses.mean_squared_error(y_true= tf.squeeze(data_test_x, axis=-1)[..., -1:], y_pred=prediction))
 
-            accuracy = list(map(map_comparison, data_test_y.numpy().tolist(), predicted_map))
             print("Accuracy: ", sum(accuracy), "/", len(accuracy))
+            print("RMSE: {}".format(np.mean(rmse.numpy())))
+
 
 
 # Test type 1, feed itself with generated data as it's predicting forward. It is generated two graphs, one with full

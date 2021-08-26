@@ -192,16 +192,15 @@ class Processing(object):
                 value[j] = np.reshape(data[(i+j):look_back + (i+j), key], newshape=[1, look_back])
                 value_output = data[(i+j) + look_back:1 + (i+j + look_back), key]
                 value_output_window = value_output
-                if value_output_window > value[0][-1]:
-                    value_output_window = [1, 0]
-                else:
-                    value_output_window = [0, 1]
+
 
             x_data.append(value)
             y_data.append(value_output_window)
 
         x_data = tf.cast(x_data, dtype=tf.dtypes.float32)
         y_data = tf.cast(y_data, dtype=tf.dtypes.float32)
+
+        x_data = tf.reshape(x_data, shape=(x_data.shape[0], look_back, window))
         return x_data, y_data
 
     def real_dataset(self, key):
