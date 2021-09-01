@@ -1,15 +1,10 @@
-import pandas as pd
-
-from config import list_key, total_epochs, test_rate, window, look_back, \
-    early_stopping_patience, val_loss_on_train, batch_size, train_in_batch, threshold_eval
+from config import list_key, total_epochs, window, look_back, \
+    early_stopping_patience, batch_size
 from bin.model import LSTM_Model
-from bin.early_stop import EarlyStop, BreakException
 from data_proc import Processing
-from tensorflow import GradientTape
 import tensorflow as tf
 import time
 from pandas import DataFrame, concat, Series
-import numpy as np
 
 
 # Creation of an object that process the dataset.

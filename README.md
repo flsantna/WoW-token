@@ -82,8 +82,8 @@ The project is mainly focused on 3 scripts:
 
 1) [Creation CSV](https://github.com/flsantna/WoW-token/blob/master/creation_of_csv_wowtoken_price.py) - Creates the base CSV file, collecting data on [WoWtokenPrices](https://wowtokenprices.com) and parsing the json to csv while filling all missing values and cropping them.
 2) [Model Train](https://github.com/flsantna/WoW-token/blob/master/model_train.py) - Train the model, calling [Data Processing](https://github.com/flsantna/WoW-token/blob/master/data_proc.py) to process the dataset, normalizing its values and if chosen in [config.py](https://github.com/flsantna/WoW-token/blob/master/config.py), convert all bases to gold/usd.
-   1) [Model Train Keras] ()
-3) [Model Test](https://github.com/flsantna/WoW-token/blob/master/model_test.py) - Test the model and plot all the graphs.
+   1) [Model Train Keras](https://github.com/flsantna/WoW-token/blob/classification/model_train_keras.py) - Can also be used to train the model, but leaves the hard work to keras and is being more reliable.
+3) [Model Test](https://github.com/flsantna/WoW-token/blob/master/model_test.py) - Test the model and generate the CSV files in output folder with results of the training.
 
 ## Used packages and versions
 
