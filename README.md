@@ -32,7 +32,7 @@ conversion to WoW token price in each region resulting in gold per USD base.
 ## Training and evaluation of the model
 
 The final model was constructed with 4 lstm layers and as output layer, one dense with output of X units, equal to the
-selected window in config.py file. As input, the model get the data in the format [Batch, Lookback, Window], the prediction output is compared with the real data 
+selected window in config.py file. As input, the model get the data in the format [Number of Batches, Batch size, Lookback, Window], the prediction output is compared with the real data 
 and extracted indicatives for decreasing in value or increasing while calculating itself rmse to evaluate how close is to real data.
 
 LSTM layer need it's data to be in window format, a window that moves through the dataset and creates overlapping between
@@ -48,22 +48,33 @@ feeded to the model it is in general, 1 unit forward the previous one. As exampl
                                                              .
                                     [95, 96, 97, 98, 99]            [100]
 
-This leads to the input shape [Quantity of sequences, 5, 1].
+This leads to the input shape [Batch size, lookback, window].
 
 After defining the model, I got up to training it. Was configured Early stopping to avoid overfitting and save time.
 
 ## Result
+ 
+As can be seen, the accuracy for 14 days of data is in a good value, to determinate if is going up or down in value was chosen a threshold value of 0.5.
 
-As result, was generated some range of predictions, they are:
+Location  |  Accuracy in %       |  RMSE
+----------|----------------------|------------
+us        |  71.42857142857143   |  0.5884802
+eu        |  71.42857142857143   |  0.15242484
+china     |  28.57142857142857   |  1.6783876
+korea     |  71.42857142857143   |  1.0066718
+taiwan    |  42.857142857142854  |  0.42732435
 
-1) All test dataset predicted using true data as training, in a scenario where there is the need to get an insight about it, and then the model can be feeded with the true data to predict the next window. Images on graphs/ with suffix "True Data as lookback".
-2) All test dataset predicted using, as the model moves forward predicting, it's own predictions, which leads overall a bigger Accuracy. Images on graphs/ with the suffix "all data".
-3) Predictions of only the chosen windows. Images on graphs/ with the suffix "days predicted".
+But, in a real world scenario, you would want do predict the next day of data, not all 14 days. In this scenario, it correctly classified the 3 prices, while other two didn't correctly.
 
-All predicted windows in one image with their own ACCURACY.
-# IN CONSTRUCTION!!
+Location  |  Prediction  |  Real Value
+----------|--------------|------------
+us        |  1           |  1
+eu        |  1           |  1
+china     |  1           |  1
+korea     |  1           |  0
+taiwan    |  1           |  0
 
-Other graphs can be found at [Graphs](https://github.com/flsantna/WoW-token/tree/master/graphs).
+
 
 ## Instructions to use
 
@@ -71,6 +82,7 @@ The project is mainly focused on 3 scripts:
 
 1) [Creation CSV](https://github.com/flsantna/WoW-token/blob/master/creation_of_csv_wowtoken_price.py) - Creates the base CSV file, collecting data on [WoWtokenPrices](https://wowtokenprices.com) and parsing the json to csv while filling all missing values and cropping them.
 2) [Model Train](https://github.com/flsantna/WoW-token/blob/master/model_train.py) - Train the model, calling [Data Processing](https://github.com/flsantna/WoW-token/blob/master/data_proc.py) to process the dataset, normalizing its values and if chosen in [config.py](https://github.com/flsantna/WoW-token/blob/master/config.py), convert all bases to gold/usd.
+   1) [Model Train Keras] ()
 3) [Model Test](https://github.com/flsantna/WoW-token/blob/master/model_test.py) - Test the model and plot all the graphs.
 
 ## Used packages and versions

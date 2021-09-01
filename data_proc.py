@@ -187,12 +187,15 @@ class Processing(object):
         data = self.normalized_data
         for i in range((data[..., key].shape[0]-look_back-window)):
             value = np.ndarray(shape=[window, look_back])
-            value_output_window = []
+            value_output_window = None
             for j in range(window):
                 value[j] = np.reshape(data[(i+j):look_back + (i+j), key], newshape=[1, look_back])
                 value_output = data[(i+j) + look_back:1 + (i+j + look_back), key]
                 value_output_window = value_output
-
+                if value_output_window > value[j][-1]:
+                    value_output_window = [1]
+                else:
+                    value_output_window = [0]
 
             x_data.append(value)
             y_data.append(value_output_window)

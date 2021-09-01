@@ -1,7 +1,7 @@
 import pandas as pd
 
 from config import list_key, total_epochs, test_rate, window, look_back, \
-    early_stopping_patience, val_loss_on_train, batch_size, train_in_batch
+    early_stopping_patience, val_loss_on_train, batch_size, train_in_batch, threshold_eval
 from bin.model import LSTM_Model
 from bin.early_stop import EarlyStop, BreakException
 from data_proc import Processing
@@ -23,6 +23,7 @@ def weighted_binary_crossentropy(y_true, y_pred):
     * keras.backend.tensorflow_backend.binary_crossentropy
     * tf.nn.weighted_cross_entropy_with_logits
     """
+
     # Transform back to logits.
     epsilon = tf.convert_to_tensor(tf.keras.backend.epsilon(), dtype=tf.dtypes.float32)
     y_pred = tf.clip_by_value(y_pred, epsilon, 1 - epsilon)
@@ -33,6 +34,15 @@ def weighted_binary_crossentropy(y_true, y_pred):
                                                     pos_weight=2)
    # return loss
     return tf.reduce_mean(loss, axis=-1)
+
+
+def map_classification(x_data):
+    if x_data[0] > threshold_eval:
+        x_data = [1, 0]
+        return x_data
+    else:
+        x_data = [0, 1]
+        return x_data
 
 
 def train_step(batch_data, batch_label):
@@ -46,8 +56,8 @@ def train_step(batch_data, batch_label):
 
 def test_step(batch_data, batch_label):
     data_pred_test = batch_data
-    predict = model.call(inputs=data_pred_test)
-    val_loss_value = loss(y_true=batch_label, y_pred=predict)
+    predict_test = model.call(inputs=data_pred_test)
+    val_loss_value = loss(y_true=batch_label, y_pred=predict_test)
     val_loss_mean.update_state(values=val_loss_value)
 
 
@@ -60,11 +70,11 @@ def get_batch_data(data, batch_size, index):
 proc = Processing()
 
 # Model structure defined.
-loss = tf.keras.losses.MeanSquaredError()
+loss = tf.keras.losses.BinaryCrossentropy()
 loss_mean = tf.keras.metrics.Mean()
 val_loss_mean = tf.keras.metrics.Mean()
 model = LSTM_Model(window=window, look_back=look_back)
-lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.001, decay_steps=15000,
+lr_scheduler = tf.keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=0.0001, decay_steps=15000,
                                                               decay_rate=0.97)
 optimizer = tf.keras.optimizers.Adam(learning_rate=lr_scheduler)
 
