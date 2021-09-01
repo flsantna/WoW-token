@@ -50,7 +50,7 @@ feeded to the model it is in general, 1 unit forward the previous one. As exampl
 
 This leads to the input shape [Batch size, lookback, window].
 
-After defining the model, I got up to training it. Was configured Early stopping to avoid overfitting and save time.
+After defining the model, got it up to training it. Was configured Early stopping to avoid overfitting and save time.
 
 ## Result
  
@@ -73,7 +73,6 @@ eu        |  1           |  1
 china     |  1           |  1
 korea     |  1           |  0
 taiwan    |  1           |  0
-
 
 
 ## Instructions to use
